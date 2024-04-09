@@ -1,0 +1,62 @@
+def generate_key_matrix(key):
+    key_matrix = [[0] * 5 for _ in range(5)]
+    chars = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+    key = key.upper().replace("J", "I")
+
+    # Fill in the key matrix
+    key_set = set(key)
+    key_chars = [char for char in chars if char not in key_set]
+
+    key += ''.join(key_chars)
+
+    k = 0
+    for i in range(5):
+        for j in range(5):
+            key_matrix[i][j] = key[k]
+            k += 1
+
+    return key_matrix
+
+def find_char_position(matrix, char):
+    for i in range(5):
+        for j in range(5):
+            if matrix[i][j] == char:
+                return i, j
+
+def playfair_encrypt(plaintext, key):
+    key_matrix = generate_key_matrix(key)
+
+    # Preprocess plaintext
+    plaintext = plaintext.upper().replace("J", "I")
+    plaintext = [char for char in plaintext if char.isalpha()]
+
+    # Encrypt pairs of letters
+    ciphertext = []
+    for i in range(0, len(plaintext), 2):
+        char1 = plaintext[i]
+        char2 = plaintext[i + 1] if i + 1 < len(plaintext) else 'X'
+
+        row1, col1 = find_char_position(key_matrix, char1)
+        row2, col2 = find_char_position(key_matrix, char2)
+
+        if row1 == row2:
+            ciphertext.append(key_matrix[row1][(col1 + 1) % 5])
+            ciphertext.append(key_matrix[row2][(col2 + 1) % 5])
+        elif col1 == col2:
+            ciphertext.append(key_matrix[(row1 + 1) % 5][col1])
+            ciphertext.append(key_matrix[(row2 + 1) % 5][col2])
+        else:
+            ciphertext.append(key_matrix[row1][col2])
+            ciphertext.append(key_matrix[row2][col1])
+
+    return ''.join(ciphertext)
+
+def main():
+    plaintext = input("Nhập vào đoạn văn bản cần mã hóa: ")
+    key = input("Nhập vào khóa: ")
+
+    ciphertext = playfair_encrypt(plaintext, key)
+    print("Văn bản đã được mã hóa:", ciphertext)
+
+if __name__ == "__main__":
+    main()
